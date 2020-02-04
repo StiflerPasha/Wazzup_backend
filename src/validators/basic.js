@@ -31,8 +31,8 @@ export const offsetConstraints = {
     onlyInteger: true,
     greaterThanOrEqualTo: 0,
     notValid: {
-      code: 'BOOKMARKS_INVALID_LINK',
-      description: 'Invalid link'
+      code: 'BOOKMARKS_INVALID_OFFSET',
+      description: 'Invalid offset'
     }
   }
 };

@@ -1,6 +1,5 @@
 const blockedDomains = ['https://yahoo.com', 'https://socket.io'];
 
-//TODO: Как передавать значение в message.desc??
 export const linkConstraints = (link) => ({
   url: {
     message: {
