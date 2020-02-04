@@ -89,26 +89,19 @@ router.get('/:guid', async (req, res) => {
     if (find) {
       const url = find.link;
       const whois = `http://htmlweb.ru/analiz/api.php?whois&url=${url}&json`;
-      const data = {};
       
-      const fetchWhois = new Promise(resolve => {
-        request(whois, (error, response, body) => {
-          if (error) {
-            data.info = { error: error.message };
-          }
-          if (response && response.statusCode === 200) {
-            data.info = JSON.parse(body);
-          }
-          resolve();
-        });
-      });
+      const data = await Promise.all([
+        new Promise((resolve, reject) => {
+          request(whois, (error, response, body) => {
+            error
+              ? reject(error)
+              : resolve(JSON.parse(body));
+          });
+        }),
+        grabity.grabIt(url)
+      ]);
       
-      const fetchOG = grabity.grabIt(url)
-        .then(res => data.og = res)
-        .catch(e => data.og = { error: e.message });
-      
-      
-      Promise.all([fetchWhois, fetchOG]).then(() => res.json(data));
+      res.json({ info: data[0], og: data[1] });
       
     } else {
       res.status(404).json('Bookmark with current ID Not Found');
@@ -126,7 +119,7 @@ router.post('/', async (req, res) => {
     const { link, description, favorites } = req.body;
     
     const validationResult = validate({ link }, {
-      link: linkConstraints
+      link: linkConstraints(link)
     });
     
     if (validationResult) {
@@ -157,7 +150,7 @@ router.patch('/:guid', async (req, res) => {
   try {
     
     const { guid } = req.params;
-    const { link } = req.body;
+    const { link, description, favorites } = req.body;
     
     const validationResult = validate({ link }, {
       link: linkConstraints(link)
@@ -172,7 +165,11 @@ router.patch('/:guid', async (req, res) => {
     
     if (find) {
       await models.bookmark.update(
-        req.body,
+        {
+          link,
+          description,
+          favorites
+        },
         { where: { guid } }
       );
     } else {
