@@ -10,3 +10,9 @@ coverage/
 
 # Documentation
 docs/
+
+# IDE
+.idea
+
+# BD
+*.sqlite
